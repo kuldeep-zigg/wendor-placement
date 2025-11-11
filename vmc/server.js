@@ -21,8 +21,107 @@ let vendingState = {
   status: 'idle', // 'idle' or 'vending'
   currentItems: [],
   startTime: null,
-  timeout: null
+  timeout: null,
+  statusInterval: null
 };
+
+// HTTP endpoints for basic health and control
+app.get('/', (req, res) => {
+  res.json({
+    message: 'VMC Mock Server',
+    ws: `ws://localhost:${PORT}`,
+    statusEndpoint: `/status`,
+    vendEndpoint: `/vend`
+  });
+});
+
+app.get('/status', (req, res) => {
+  const base = {
+    status: vendingState.status,
+    timestamp: new Date().toISOString()
+  };
+  if (vendingState.status === 'vending' && vendingState.startTime) {
+    const elapsed = Date.now() - vendingState.startTime;
+    return res.json({
+      ...base,
+      items: vendingState.currentItems,
+      elapsedTime: elapsed,
+      message: 'Vending in progress'
+    });
+  }
+  return res.json({ ...base, message: 'Machine is idle' });
+});
+
+app.post('/vend', (req, res) => {
+  const { items } = req.body || {};
+  if (!Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ error: 'Invalid items array' });
+  }
+  if (vendingState.status === 'vending') {
+    return res.status(409).json({ error: 'Vending machine is currently busy', currentItems: vendingState.currentItems });
+  }
+
+  // Start vending via same logic as WS path
+  vendingState.status = 'vending';
+  vendingState.currentItems = items;
+  vendingState.startTime = Date.now();
+
+  // Broadcast start
+  wss.clients.forEach((client) => {
+    if (client.readyState === 1) {
+      client.send(JSON.stringify({ type: 'status', status: 'vending', items }));
+    }
+  });
+
+  res.json({ ok: true, message: 'Vending started', items, estimatedTime: 5000 });
+
+  const vendingDelay = 5000;
+  vendingState.statusInterval = setInterval(() => {
+    if (vendingState.status === 'vending' && vendingState.startTime) {
+      const elapsed = Date.now() - vendingState.startTime;
+      wss.clients.forEach((client) => {
+        if (client.readyState === 1) {
+          client.send(JSON.stringify({
+            type: 'status',
+            status: 'vending',
+            items: vendingState.currentItems,
+            elapsedTime: elapsed,
+            message: 'Vending in progress',
+            timestamp: new Date().toISOString()
+          }));
+        }
+      });
+    } else {
+      if (vendingState.statusInterval) {
+        clearInterval(vendingState.statusInterval);
+        vendingState.statusInterval = null;
+      }
+    }
+  }, 1000);
+
+  vendingState.timeout = setTimeout(() => {
+    if (vendingState.statusInterval) {
+      clearInterval(vendingState.statusInterval);
+      vendingState.statusInterval = null;
+    }
+    vendingState.status = 'idle';
+    const vendedItems = [...vendingState.currentItems];
+    vendingState.currentItems = [];
+    vendingState.startTime = null;
+    vendingState.timeout = null;
+    wss.clients.forEach((client) => {
+      if (client.readyState === 1) {
+        client.send(JSON.stringify({
+          type: 'vend-complete',
+          status: 'idle',
+          message: 'Vending completed successfully',
+          vendedItems,
+          timestamp: new Date().toISOString()
+        }));
+      }
+    });
+  }, vendingDelay);
+});
 
 // Broadcast to all connected WebSocket clients
 function broadcast(data) {
@@ -34,27 +133,6 @@ function broadcast(data) {
 }
 
 // WebSocket connection handler
-wss.on('connection', (ws) => {
-  console.log('New WebSocket client connected');
-  
-  // Send current status to new client
-  ws.send(JSON.stringify({
-    type: 'status',
-    status: vendingState.status,
-    items: vendingState.currentItems
-  }));
-
-  ws.on('close', () => {
-    console.log('WebSocket client disconnected');
-  });
-
-  ws.on('error', (error) => {
-    console.error('WebSocket error:', error);
-  });
-});
-
-// WebSocket endpoint for vending events
-
 wss.on('connection', (ws) => {
   console.log('New WebSocket client connected');
 
@@ -126,8 +204,33 @@ wss.on('connection', (ws) => {
 
       // Simulate vending process (5 seconds delay)
       const vendingDelay = 5000;
+      
+      // Send periodic status updates during vending
+      vendingState.statusInterval = setInterval(() => {
+        if (vendingState.status === 'vending' && vendingState.startTime) {
+          const elapsed = Date.now() - vendingState.startTime;
+          broadcast({
+            type: 'status',
+            status: 'vending',
+            items: vendingState.currentItems,
+            elapsedTime: elapsed,
+            message: 'Vending in progress',
+            timestamp: new Date().toISOString()
+          });
+        } else {
+          if (vendingState.statusInterval) {
+            clearInterval(vendingState.statusInterval);
+            vendingState.statusInterval = null;
+          }
+        }
+      }, 1000); // Update every second
 
       vendingState.timeout = setTimeout(() => {
+        if (vendingState.statusInterval) {
+          clearInterval(vendingState.statusInterval);
+          vendingState.statusInterval = null;
+        }
+        
         // Complete vending
         vendingState.status = 'idle';
         const vendedItems = [...vendingState.currentItems];
@@ -205,6 +308,9 @@ process.on('SIGINT', () => {
   console.log('\nShutting down VMC Mock Server...');
   if (vendingState.timeout) {
     clearTimeout(vendingState.timeout);
+  }
+  if (vendingState.statusInterval) {
+    clearInterval(vendingState.statusInterval);
   }
   server.close(() => {
     console.log('Server closed');

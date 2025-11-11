@@ -1,0 +1,303 @@
+.kiosk-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecef 100%);
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.kiosk-header {
+  background: white;
+  padding: 30px 40px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-bottom: 4px solid #c62828;
+}
+
+.brand-name {
+  margin: 0;
+  font-size: 48px;
+  font-weight: 800;
+  color: #c62828;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.brand-tagline {
+  margin: 8px 0 0 0;
+  font-size: 18px;
+  color: #666;
+  font-weight: 500;
+  letter-spacing: 2px;
+}
+
+/* Tray Section */
+.tray-section {
+  padding: 40px;
+  background: white;
+  border-top: 3px solid #f0f0f0;
+}
+
+.tray-section:first-of-type {
+  border-top: none;
+  padding-top: 40px;
+}
+
+.tray-title {
+  margin: 0 0 25px 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: #333;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.tray-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: auto;
+  gap: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+  /* 2 rows × 3 columns = 6 items per tray */
+  /* Grid will automatically create rows as needed */
+}
+
+.empty-tray {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+/* Pagination Section */
+.pagination-section {
+  padding: 30px 40px;
+  background: white;
+  border-top: 3px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.pagination-button {
+  padding: 12px 24px;
+  background: #c62828;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  min-width: 100px;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background: #b71c1c;
+}
+
+.pagination-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.pagination-info {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  min-width: 120px;
+  text-align: center;
+}
+
+.pagination-dots {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.pagination-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #c62828;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.pagination-dot:hover {
+  background: #ffebee;
+  transform: scale(1.2);
+}
+
+.pagination-dot.active {
+  background: #c62828;
+  width: 14px;
+  height: 14px;
+}
+
+/* Footer */
+.kiosk-footer {
+  background: #2c3e50;
+  padding: 20px 40px;
+  color: white;
+  text-align: center;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.footer-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.powered-by {
+  color: #bdc3c7;
+  font-weight: 500;
+}
+
+.wendor-logo {
+  color: #f44336;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 2px;
+}
+
+.version-info {
+  color: #95a5a6;
+  font-size: 12px;
+  margin-left: 20px;
+}
+
+/* Loading Screen */
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: white;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #c62828;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-screen p {
+  margin-top: 20px;
+  font-size: 18px;
+  color: #666;
+}
+
+/* Error Screen */
+.error-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: white;
+  padding: 40px;
+  text-align: center;
+}
+
+.error-screen h2 {
+  color: #f44336;
+  margin-bottom: 16px;
+}
+
+.error-screen p {
+  color: #666;
+  margin-bottom: 24px;
+}
+
+.error-screen button {
+  padding: 12px 24px;
+  background: #c62828;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.error-screen button:hover {
+  background: #b71c1c;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .tray-grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: auto; /* Let rows adjust automatically */
+  }
+}
+
+@media (max-width: 768px) {
+  .brand-name {
+    font-size: 36px;
+  }
+
+  .brand-tagline {
+    font-size: 14px;
+  }
+
+  .tray-section {
+    padding: 20px;
+  }
+
+  .tray-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto; /* Let rows adjust automatically */
+    gap: 20px;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .version-info {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-name {
+    font-size: 28px;
+    letter-spacing: 2px;
+  }
+
+  .kiosk-header {
+    padding: 20px;
+  }
+}
+
