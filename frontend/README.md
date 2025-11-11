@@ -1,11 +1,12 @@
 # Frontend (React + Vite + TypeScript)
 
-React 19 + Vite 7 + TypeScript setup for the Wendor application UI.
+React 19 + Vite 7 + TypeScript frontend for the Wendor vending machine simulation system.
 
 ## Tech Stack
 - React 19
 - Vite 7 (ESBuild + Rollup hybrid)
 - TypeScript 5
+- React Router DOM
 - ESLint (flat config) + React Hooks & Refresh plugins
 
 ## Scripts
@@ -24,6 +25,14 @@ npm run dev
 ```
 Dev server (default): http://localhost:5173
 
+## Environment Variables
+Create a `.env.local` file for custom values:
+```
+VITE_API_BASE=http://localhost:3001
+VITE_VMC_WS=ws://localhost:3002
+```
+Access in code via `import.meta.env.VITE_API_BASE`.
+
 ## Build
 ```bash
 npm run build
@@ -34,29 +43,43 @@ npm run preview   # serve dist build
 ```
 frontend/
   src/
-    main.tsx       # App bootstrap
-    App.tsx        # Root component
+    components/
+      ProductCard.tsx      # Product card component
+      ProductCard.css
+    pages/
+      Products.tsx         # Products listing page
+      Products.css
+    services/
+      api.ts              # API client
+      websocket.ts        # VMC WebSocket client
+    App.tsx               # Root component with routing
+    main.tsx              # App bootstrap
     index.css
     App.css
-  public/          # Static assets
+  public/                 # Static assets
   vite.config.ts
   tsconfig*.json
   eslint.config.js
 ```
 
-## Environment Variables
-Create a `.env` or `.env.local` file for custom values (example):
-```
-VITE_API_BASE=http://localhost:3001
-VITE_VMC_WS=ws://localhost:3002
-```
-Access in code via `import.meta.env.VITE_API_BASE`.
-
-## Suggested Next Steps
-- Add routing (e.g. React Router)
-- Add API client layer (fetch wrapper)
-- Integrate real-time vending status via WebSocket
-- Introduce component-level tests (Vitest + React Testing Library)
+## Features
+- **Products Page** (`/products`): Displays all products from the backend
+- **Product Cards**: Each card shows product details with a "Pay" button
+- **Real-time Vending**: WebSocket integration with VMC for live vending status updates
+- **Progress Tracking**: Visual progress bar during vending operations
+- **No Re-renders**: Product list doesn't re-render during vending updates (optimized state management)
 
 ## Linking to Backend/VMC
-Ensure backend runs on port 3001 and VMC mock on 3002, then use the env values above.
+Ensure:
+- Backend runs on port 3001
+- VMC mock server runs on port 3002
+- Set environment variables as shown above
+
+## Usage Flow
+1. User views products on `/products` page
+2. User clicks "Pay" button on a product
+3. Frontend sends POST request to `/api/pay`
+4. Backend triggers vending via VMC WebSocket
+5. Frontend receives real-time status updates via WebSocket
+6. Progress bar shows vending progress
+7. Vending completes and UI updates accordingly

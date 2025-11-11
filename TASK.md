@@ -92,7 +92,7 @@ backend/
 ---
 
 ## 🧩 2. Database (PostgreSQL)
-Use the provided **TestDB** credentials (“Online Creds”).  
+Use the provided **TestDB** credentials ("Online Creds").  
 The backend should query from the `products` table and serve data via `/api/products`.  
 
 ---
